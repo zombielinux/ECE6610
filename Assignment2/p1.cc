@@ -18,6 +18,8 @@
 #include "ns3/internet-module.h"
 #include "ns3/point-to-point-layout-module.h"
 #include "ns3/applications-module.h"
+#include "ns3/point-to-point-helper.h"
+
 
 using namespace ns3;
 
@@ -49,51 +51,76 @@ main (int argc, char *argv[])
     Config::SetDefault("ns3::TcpL4Protocol::SocketType", TypeIdValue(TcpHighSpeed::GetTypeId()));
   }
 
-  std::cout << protocol << std::endl;
-  std::cout << nSpokes << std::endl;
+//  std::cout << protocol << std::endl;
+//  std::cout << nSpokes << std::endl;
 
 
   //Use the given p2p attributes for each star
-  PointToPointHelper pointToPoint;
+ PointToPointHelper pointToPoint;
   pointToPoint.SetDeviceAttribute("DataRate", StringValue("5Mbps"));
   pointToPoint.SetChannelAttribute("Delay", StringValue("10ms"));
-  
+
+ //Create the inter-hub link
+ PointToPointHelper hubToHub;
+  hubToHub.SetDeviceAttribute("DataRate", StringValue("1Mbps"));
+  hubToHub.SetChannelAttribute("Delay", StringValue("20ms"));
+
   //Use the pointToPoint helper to create point to point stars
-  PointToPointStarHelper star(nSpokes, pointToPoint);
+  PointToPointStarHelper starLeft(nSpokes, pointToPoint);
+  PointToPointStarHelper starRight(nSpokes, pointToPoint);
+
+  NetDeviceContainer hubs;
+
+  hubs = hubToHub.Install(starLeft.GetHub(), starRight.GetHub());
+
+// std::cout<<hubs<<std::endl;
 
   InternetStackHelper internet;
-  star.InstallStack(internet);
+  starLeft.InstallStack(internet);
+  starRight.InstallStack(internet);
+//  hubToHub.InstallStack(internet);
 
-  Ipv4AddressHelper address("172.16.1.0", "255.255.255.0");
+  Ipv4AddressHelper addressLeft("172.16.1.0", "255.255.255.0");
+  Ipv4AddressHelper addressRight("172.18.1.0", "255.255.255.0");
 
-  star.AssignIpv4Addresses(address);
+  Ipv4AddressHelper hubLeft("172.110.1.1", "255.255.255.255");
+  Ipv4AddressHelper hubRight("172.110.1.2", "255.255.255.255");
+
+  starLeft.AssignIpv4Addresses(addressLeft);
+  starRight.AssignIpv4Addresses(addressRight);
+
+  hubLeft.Assign(hubs);
 
   Address sinkLocalAddress(InetSocketAddress(Ipv4Address::GetAny(), 5000));
+
   PacketSinkHelper sinkHelper ("ns3::TcpSocketFactory", sinkLocalAddress);
+
   ApplicationContainer sinkApps;
   for(uint32_t i = 0; i < nSpokes; ++i) {
-  	sinkApps.Add(sinkHelper.Install(star.GetSpokeNode(i)));
+  	sinkApps.Add(sinkHelper.Install(starLeft.GetSpokeNode(i)));
   }
 
   sinkApps.Start(Seconds(1.0));
 
   BulkSendHelper bulkSender ("ns3::TcpSocketFactory", Address());
   bulkSender.SetAttribute("SendSize", UintegerValue(1024));
+  //std::cout << "HERE" << std::endl;
+
 
   ApplicationContainer sourceApps;
   for(uint32_t i = 0; i < nSpokes; ++i) 
   {
-    uint32_t remoteNode = (i + 1) % nSpokes;
-  	AddressValue remoteAddress(InetSocketAddress(star.GetSpokeIpv4Address(remoteNode), 5000));
+    uint32_t remoteNode = (i) % nSpokes;
+  	AddressValue remoteAddress(InetSocketAddress(starLeft.GetSpokeIpv4Address(remoteNode), 5000));
   	bulkSender.SetAttribute("Remote", remoteAddress);
-  	sourceApps.Add(bulkSender.Install(star.GetSpokeNode(i)));
+  	sourceApps.Add(bulkSender.Install(starRight.GetSpokeNode(i)));
   }
 
   sourceApps.Start(Seconds(2.0));
 
   Ipv4GlobalRoutingHelper::PopulateRoutingTables();
 
-  Simulator::Stop(Seconds(60.0));
+  Simulator::Stop(Seconds(endTime));
 
   Simulator::Run ();
 
@@ -110,7 +137,7 @@ main (int argc, char *argv[])
 
   std::cout << std::endl;
   std::cout << "Totals\tTotalRx: " << totalRx * 1e-6 * 8 << "Mb";
-  std::cout << "\tGoodput: " << (totalRx * 1e-6 * 8) / endTime << "Mbps" << std::endl;
+  std::cout << "\tThroughput: " << (totalRx * 1e-6 * 8) / endTime << "Mbps" << std::endl;
 
   Simulator::Destroy ();
 }
