@@ -1,0 +1,3 @@
+Sink 0	TotalRx: 51.9498Mb	Throughput: 0.865829Mbps
+
+Totals	TotalRx: 51.9498Mb	Throughput: 0.865829Mbps
