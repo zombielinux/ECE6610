@@ -1,0 +1,10 @@
+Sink 0	TotalRx: 4.08646Mb	Throughput: 0.0681077Mbps
+Sink 1	TotalRx: 15.8399Mb	Throughput: 0.263998Mbps
+Sink 2	TotalRx: 4.42522Mb	Throughput: 0.0737536Mbps
+Sink 3	TotalRx: 4.72845Mb	Throughput: 0.0788075Mbps
+Sink 4	TotalRx: 5.22278Mb	Throughput: 0.0870464Mbps
+Sink 5	TotalRx: 4.30086Mb	Throughput: 0.0716811Mbps
+Sink 6	TotalRx: 4.67821Mb	Throughput: 0.0779701Mbps
+Sink 7	TotalRx: 4.23654Mb	Throughput: 0.0706091Mbps
+
+Totals	TotalRx: 47.5184Mb	Throughput: 0.791973Mbps
