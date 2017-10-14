@@ -172,7 +172,7 @@ int main(int argc, char* argv[]) {
 	std::string animationFile = "demo.xml";
 
 
-	double stopTime = 10.0;
+	double stopTime = 2.00;
 
 	double minTh = 50;
 	double maxTh = 80;
