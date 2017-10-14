@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
 #include "ns3/internet-module.h"
@@ -35,17 +36,34 @@ u32 port = 5000;
 
 constexpr u32 packetSize = 1000 - 42;
 
-
+std::ofstream enqueue;
+std::ofstream dequeue;
+std::ofstream dropped;
+std::ofstream queuesize;
 
 //REMEMBER:  This is not an exact replica of what you need to create.  It just shows something relatively similar.
 //NOTE: What it is I do in this example may not be the only way to achieve what you're trying to do for this assignment
 
+//Get information from TCP header
+//Need Sqeuenc number
+//Need time (one for arrival, one for departure)
+//Enable packet metadata. 
+//Easier to look at tcp header documentation. 	
+
 
 
 void EnqueueAtRed(Ptr<const QueueItem> item) {
+
 	TcpHeader tcp;
 	Ptr<Packet> pkt = item->GetPacket();
 	pkt->PeekHeader(tcp);
+//WS Works	
+	
+//	std::cout <<"eq,"<< Simulator::Now().GetSeconds() <<","<<tcp.GetDestinationPort()-4999<<","<<tcp.GetSequenceNumber() << std::endl;
+
+	enqueue.open("/home/will/Homework/Assignment3/p2c-enqueue.txt", std::ios::app);
+	enqueue <<Simulator::Now().GetSeconds() <<","<<tcp.GetDestinationPort()-4999<<","<<tcp.GetSequenceNumber() << std::endl;
+	enqueue.close();
 
 	//TODO:  Need to figure out how to print the time this packet arrived and which flow it belongs to.  Hint below in app setup.
 	//REMEMBER:  The sequence number is actually in bytes not packets so to make it graph nice you'll need to manipulate to get 
@@ -58,6 +76,13 @@ void DequeueAtRed(Ptr<const QueueItem> item) {
 	Ptr<Packet> pkt = item->GetPacket();
 	pkt->PeekHeader(tcp);
 
+//	std::cout << "dq," << Simulator::Now().GetSeconds() <<","<<tcp.GetDestinationPort()-4999<<","<<tcp.GetSequenceNumber() << std::endl;
+
+	dequeue.open("/home/will/Homework/Assignment3/p2c-dequeue.txt", std::ios::app);
+	dequeue <<Simulator::Now().GetSeconds() <<","<<tcp.GetDestinationPort()-4999<<","<<tcp.GetSequenceNumber() << std::endl;
+	dequeue.close();
+
+
 	//TODO:  Need to figure out how to print the time this packet left and which flow it belongs to.  Hint below in app setup.
 	//REMEMBER:  The sequence number is actually in bytes not packets so to make it graph nice you'll need to manipulate to get 
 	//           nice consequtive sequence numbers to graph
@@ -68,6 +93,14 @@ void DroppedAtRed(Ptr<const QueueItem> item) {
 	TcpHeader tcp;
 	Ptr<Packet> pkt = item->GetPacket();
 	pkt->PeekHeader(tcp);
+
+
+//	std::cout << "dr," <<Simulator::Now().GetSeconds() <<","<<tcp.GetDestinationPort()-4999<<","<<tcp.GetSequenceNumber() << std::endl;
+
+	dropped.open("/home/will/Homework/Assignment3/p2c-dropped.txt", std::ios::app);
+	dropped <<Simulator::Now().GetSeconds() <<","<<tcp.GetDestinationPort()-4999<<","<<tcp.GetSequenceNumber() << std::endl;
+	dropped.close();
+
 
 	//TODO:  Need to figure out how to print the time this packet was dropped and which flow it belongs to.  Hint below in app setup.
 	//REMEMBER:  The sequence number is actually in bytes not packets so to make it graph nice you'll need to manipulate to get 
@@ -80,6 +113,12 @@ void CheckQueueSize(Ptr<QueueDisc> queue) {
 	u32 qsize = StaticCast<RedQueueDisc>(queue)->GetQueueSize();
 	avgQueueSize += qsize;
 	checkTimes++;
+	
+
+	queuesize.open("/home/will/Homework/Assignment3/p2c-queuesize.txt", std::ios::app);
+//	std::cout <<Simulator::Now().GetSeconds()<< "," << qsize << ","<< avgQueueSize << std::endl;
+	queuesize <<Simulator::Now().GetSeconds()<< "," << qsize << ","<< avgQueueSize << std::endl;
+	queuesize.close();
 
 	Simulator::Schedule(Seconds(0.01), &CheckQueueSize, queue);
 
@@ -94,6 +133,24 @@ void CheckQueueSize(Ptr<QueueDisc> queue) {
 
 
 int main(int argc, char* argv[]) {
+
+	enqueue.open("/home/will/Homework/Assignment3/p2c-enqueue.txt");
+	enqueue << "Time,Source,Sequence\n";
+	enqueue.close();
+
+	dequeue.open("/home/will/Homework/Assignment3/p2c-dequeue.txt");
+	dequeue << "Time,Source,Sequence\n";
+	dequeue.close();
+
+	dropped.open("/home/will/Homework/Assignment3/p2c-dropped.txt");
+	dropped << "Time,Source,Sequence\n";
+	dropped.close();
+
+	queuesize.open("/home/will/Homework/Assignment3/p2c-queuesize.txt");
+	queuesize << "Time,CurrentSize,AverageSize\n";
+	queuesize.close();
+
+
 
 	std::string pathOut = ".";
 	bool writeForPlot = true;
@@ -115,7 +172,7 @@ int main(int argc, char* argv[]) {
 	std::string animationFile = "demo.xml";
 
 
-	double stopTime = 3.0;
+	double stopTime = 10.0;
 
 	double minTh = 50;
 	double maxTh = 80;
@@ -189,7 +246,7 @@ int main(int argc, char* argv[]) {
 	stack.Install(d.GetRight());	
 	TrafficControlHelper tchBottleneck;
 	tchBottleneck.SetRootQueueDisc("ns3::RedQueueDisc");
-	//this `install` below returns a QueueDiscContainer.  Since I'm only installing one queue, I'm just going to grab the first one
+ 	//this `install` below returns a QueueDiscContainer.  Since I'm only installing one queue, I'm just going to grab the first one
 	Ptr<QueueDisc> redQueue = (tchBottleneck.Install(d.GetLeft()->GetDevice(0))).Get(0);
 	tchBottleneck.Install(d.GetRight()->GetDevice(0));
 	
@@ -210,6 +267,9 @@ int main(int argc, char* argv[]) {
 	//Configure Sources
 	ApplicationContainer sources;
 
+	Address sourceLocalAddress(InetSocketAddress (Ipv4Address::GetAny(), port));
+	
+
 	//Install Sources
 	OnOffHelper sourceHelper("ns3::TcpSocketFactory", Address());
 	sourceHelper.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=1]"));
@@ -226,10 +286,14 @@ int main(int argc, char* argv[]) {
 	for(u32 i = 0; i < d.LeftCount(); ++i) {
 		//NOTE:  here I'm going to create one source on each leaf node and configure it to send to the corresponding leaf on the other side.
 		//       pretend I did this... I actually did do it but I removed it to not give everything away
-		AddressValue remoteAddress (InetSocketAddress (GetAddress(i), port))
-//		sourceHelper.SetAttribute("Remote", d.GetRight(i));
-		sourceHelper.Install(d.GetLeft(i));
+		AddressValue remoteAddress (InetSocketAddress (d.GetRightIpv4Address(i), port+i));
+		sourceHelper.SetAttribute("Remote", remoteAddress);
+		sources = sourceHelper.Install(d.GetLeft(i));
+		sources.Add(sourceHelper.Install(d.GetLeft(i)));
+		sources.Start(Seconds (1.0));
+		sources.Stop(Seconds (stopTime));
 	}
+
 
 	//Configure Sinks
 
@@ -238,13 +302,15 @@ int main(int argc, char* argv[]) {
 
 	ApplicationContainer sinks;
 
-	OnOffHelper sinkHelper("ns3::TcpSocketFactory", Address());
 
+//Added WS
 
 	//Install Sinks
 	for(u32 i = 0; i < d.RightCount(); ++i) {
 		//NOTE:  Here I'm going to create one sink on each leaf node on the right hand side
-		sinkHelper.Install(d.GetRight(i));
+		Address sinkLocalAddress(InetSocketAddress (Ipv4Address::GetAny (), port+i));
+		PacketSinkHelper sinkHelper ("ns3::TcpSocketFactory", sinkLocalAddress);
+		sinks = sinkHelper.Install(d.GetRight(i));
 	}
 
 	sources.Start(Seconds(1));
