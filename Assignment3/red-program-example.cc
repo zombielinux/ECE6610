@@ -163,11 +163,11 @@ int main(int argc, char* argv[]) {
 	u32 maxPackets = 100;
 	u32 inputArgTest= 0;
 
-	std::string leafLinkBW = "10Mbps";
-	std::string leafLinkDelay = "1ms";
+	std::string leafLinkBW = "100Mbps";
+	std::string leafLinkDelay = "3ms";
 
-	std::string bottleneckLinkBW = "1Mbps";
-	std::string bottleneckLinkDelay = "50ms";
+	std::string bottleneckLinkBW = "45Mbps";
+	std::string bottleneckLinkDelay = "2ms";
 
 	std::string animationFile = "demo.xml";
 
