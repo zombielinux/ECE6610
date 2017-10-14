@@ -61,7 +61,7 @@ void EnqueueAtRed(Ptr<const QueueItem> item) {
 	
 //	std::cout <<"eq,"<< Simulator::Now().GetSeconds() <<","<<tcp.GetDestinationPort()-4999<<","<<tcp.GetSequenceNumber() << std::endl;
 
-	enqueue.open("/home/will/Homework/Assignment3/p2c-enqueue.txt", std::ios::app);
+	enqueue.open("/home/will/Homework/Assignment3/p2c-enqueue.csv", std::ios::app);
 	enqueue <<Simulator::Now().GetSeconds() <<","<<tcp.GetDestinationPort()-4999<<","<<tcp.GetSequenceNumber() << std::endl;
 	enqueue.close();
 
@@ -78,7 +78,7 @@ void DequeueAtRed(Ptr<const QueueItem> item) {
 
 //	std::cout << "dq," << Simulator::Now().GetSeconds() <<","<<tcp.GetDestinationPort()-4999<<","<<tcp.GetSequenceNumber() << std::endl;
 
-	dequeue.open("/home/will/Homework/Assignment3/p2c-dequeue.txt", std::ios::app);
+	dequeue.open("/home/will/Homework/Assignment3/p2c-dequeue.csv", std::ios::app);
 	dequeue <<Simulator::Now().GetSeconds() <<","<<tcp.GetDestinationPort()-4999<<","<<tcp.GetSequenceNumber() << std::endl;
 	dequeue.close();
 
@@ -97,7 +97,7 @@ void DroppedAtRed(Ptr<const QueueItem> item) {
 
 //	std::cout << "dr," <<Simulator::Now().GetSeconds() <<","<<tcp.GetDestinationPort()-4999<<","<<tcp.GetSequenceNumber() << std::endl;
 
-	dropped.open("/home/will/Homework/Assignment3/p2c-dropped.txt", std::ios::app);
+	dropped.open("/home/will/Homework/Assignment3/p2c-dropped.csv", std::ios::app);
 	dropped <<Simulator::Now().GetSeconds() <<","<<tcp.GetDestinationPort()-4999<<","<<tcp.GetSequenceNumber() << std::endl;
 	dropped.close();
 
@@ -115,7 +115,7 @@ void CheckQueueSize(Ptr<QueueDisc> queue) {
 	checkTimes++;
 	
 
-	queuesize.open("/home/will/Homework/Assignment3/p2c-queuesize.txt", std::ios::app);
+	queuesize.open("/home/will/Homework/Assignment3/p2c-queuesize.csv", std::ios::app);
 //	std::cout <<Simulator::Now().GetSeconds()<< "," << qsize << ","<< avgQueueSize << std::endl;
 	queuesize <<Simulator::Now().GetSeconds()<< "," << qsize << ","<< avgQueueSize << std::endl;
 	queuesize.close();
@@ -134,19 +134,19 @@ void CheckQueueSize(Ptr<QueueDisc> queue) {
 
 int main(int argc, char* argv[]) {
 
-	enqueue.open("/home/will/Homework/Assignment3/p2c-enqueue.txt");
+	enqueue.open("/home/will/Homework/Assignment3/p2c-enqueue.csv");
 	enqueue << "Time,Source,Sequence\n";
 	enqueue.close();
 
-	dequeue.open("/home/will/Homework/Assignment3/p2c-dequeue.txt");
+	dequeue.open("/home/will/Homework/Assignment3/p2c-dequeue.csv");
 	dequeue << "Time,Source,Sequence\n";
 	dequeue.close();
 
-	dropped.open("/home/will/Homework/Assignment3/p2c-dropped.txt");
+	dropped.open("/home/will/Homework/Assignment3/p2c-dropped.csv");
 	dropped << "Time,Source,Sequence\n";
 	dropped.close();
 
-	queuesize.open("/home/will/Homework/Assignment3/p2c-queuesize.txt");
+	queuesize.open("/home/will/Homework/Assignment3/p2c-queuesize.csv");
 	queuesize << "Time,CurrentSize,AverageSize\n";
 	queuesize.close();
 
