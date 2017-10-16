@@ -226,7 +226,71 @@ int main(int argc, char* argv[]) {
 	PointToPointDumbbellHelper d (	numberOfLeaves, pointToPointLeaf,	//specify how many (computer) nodes I want on the left.  specify the link from the computers to the left blue circle
 					numberOfLeaves, pointToPointLeaf,	//specify how many (computer) nodes I want on the right.  specify the link from the computers to the right blue circle
 					bottleneckLink);				//specify the link between the blue circles
-	
+
+	NodeContainer nodes;
+	nodes.Create(10);
+
+	//Create the 1->A link
+	PointToPointHelper onetoA;
+	onetoA.SetDeviceAttribute ("DataRate", StringValue(leafLinkBW));
+	onetoA.SetChannelAttribute ("Delay", StringValue(".5ms"));
+	NetDeviceContainer onetoAContainer = onetoA.Install(nodes.Get(0),nodes.Get(4));
+
+	//Create the 2->A link
+	PointToPointHelper twotoA;
+	twotoA.SetDeviceAttribute ("DataRate", StringValue(leafLinkBW));
+	twotoA.SetChannelAttribute ("Delay", StringValue("1ms"));
+	NetDeviceContainer twotoAContainer = twotoA.Install(nodes.Get(1),nodes.Get(4));
+
+	//Create the 3->A link
+	PointToPointHelper threetoA;
+	threetoA.SetDeviceAttribute ("DataRate", StringValue(leafLinkBW));
+	threetoA.SetChannelAttribute ("Delay", StringValue("3ms"));
+	NetDeviceContainer threetoAContainer = threetoA.Install(nodes.Get(2),nodes.Get(4));
+
+	//Create the 4->A link
+	PointToPointHelper fourtoA;
+	fourtoA.SetDeviceAttribute ("DataRate", StringValue(leafLinkBW));
+	fourtoA.SetChannelAttribute ("Delay", StringValue("5ms"));
+	NetDeviceContainer fourtoAContainer = fourtoA.Install(nodes.Get(3),nodes.Get(4));
+
+	//Create the A->B Bottlneck
+	PointToPointHelper AtoB;
+	AtoB.SetDeviceAttribute ("DataRate", StringValue(bottleneckLinkBW));
+	AtoB.SetChannelAttribute ("Delay", StringValue(bottleneckLinkDelay));
+	NetDeviceContainer AtoBContainer = AtoB.Install(nodes.Get(4),nodes.Get(5));
+
+	//Create the B->5 link
+	PointToPointHelper BtoFive;
+	BtoFive.SetDeviceAttribute ("DataRate", StringValue(leafLinkBW));
+	BtoFive.SetChannelAttribute ("Delay", StringValue(".5ms"));
+	NetDeviceContainer BtoFiveContainer = BtoFive.Install(nodes.Get(5),nodes.Get(6));
+
+	//Create the B->6 link
+	PointToPointHelper BtoSix;
+	BtoSix.SetDeviceAttribute ("DataRate", StringValue(leafLinkBW));
+	BtoSix.SetChannelAttribute ("Delay", StringValue("1ms"));
+	NetDeviceContainer BtoSixContainer = BtoSix.Install(nodes.Get(5),nodes.Get(7));
+
+	//Create the B->7 link
+	PointToPointHelper BtoSeven;
+	BtoSeven.SetDeviceAttribute ("DataRate", StringValue(leafLinkBW));
+	BtoSeven.SetChannelAttribute ("Delay", StringValue("3ms"));
+	NetDeviceContainer BtoSevenContainer = BtoSeven.Install(nodes.Get(5),nodes.Get(8));
+
+	//Create the B->8 link
+	PointToPointHelper BtoEight;
+	BtoEight.SetDeviceAttribute ("DataRate", StringValue(leafLinkBW));
+	BtoEight.SetChannelAttribute ("Delay", StringValue("5ms"));
+	NetDeviceContainer BtoEightContainer = BtoEight.Install(nodes.Get(5),nodes.Get(9));
+
+
+
+//	PointToPointStarHelper left ( numberOfLeaves , pointToPointLeaf);
+
+
+//	PointToPointStarHelper right ( numberOfLeaves , pointToPointLeaf);
+
 
 	//this is for NetAnim
 	d.BoundingBox(1, 1, 100, 100);
@@ -234,6 +298,10 @@ int main(int argc, char* argv[]) {
 	InternetStackHelper stack;
 
 	//Do the ones on the left side than right
+	for(u32 i=0; i < 10; i++) {
+		stack.Install(nodes.Get(i));
+	}
+
 	for(u32 i = 0; i < d.LeftCount(); ++i) {
 		stack.Install(d.GetLeft(i));
 	}
@@ -242,48 +310,153 @@ int main(int argc, char* argv[]) {
 	}
 
 	//setup red queue on bottleneck
+	//This just installs on the two middle nodes of the dumbell. 
 	stack.Install(d.GetLeft());	//GetLeft() and GetRight() return one node.  It's the node on that side of the bottleneck
 	stack.Install(d.GetRight());	
+
+
 	TrafficControlHelper tchBottleneck;
 	tchBottleneck.SetRootQueueDisc("ns3::RedQueueDisc");
  	//this `install` below returns a QueueDiscContainer.  Since I'm only installing one queue, I'm just going to grab the first one
 	Ptr<QueueDisc> redQueue = (tchBottleneck.Install(d.GetLeft()->GetDevice(0))).Get(0);
 	tchBottleneck.Install(d.GetRight()->GetDevice(0));
-	
+
+	//Install red queue on node B
+	Ptr<QueueDisc> redQueue1 = (tchBottleneck.Install(nodes.Get(4)->GetDevice(0))).Get(0);
+	tchBottleneck.Install(nodes.Get(5)->GetDevice(0));
+
 	//NOTE:  If I don't do the above with the RedQueueDisc, I'll end up with default queues on the bottleneck link.
 
 	//setup traces
-	redQueue->TraceConnectWithoutContext("Enqueue", MakeCallback(&EnqueueAtRed));
-	redQueue->TraceConnectWithoutContext("Dequeue", MakeCallback(&DequeueAtRed));
-	redQueue->TraceConnectWithoutContext("Drop", MakeCallback(&DroppedAtRed));
+	redQueue1->TraceConnectWithoutContext("Enqueue", MakeCallback(&EnqueueAtRed));
+	redQueue1->TraceConnectWithoutContext("Dequeue", MakeCallback(&DequeueAtRed));
+	redQueue1->TraceConnectWithoutContext("Drop", MakeCallback(&DroppedAtRed));
 
 	//ASSIGN IP
 	d.AssignIpv4Addresses (	Ipv4AddressHelper (	"10.1.1.0", "255.255.255.0"),
 							Ipv4AddressHelper ( "10.2.1.0", "255.255.255.0"),
 							Ipv4AddressHelper ( "10.3.1.0", "255.255.255.0"));
 
+//Assign IPs to nodes
+	Ipv4AddressHelper ipv4nodes;
+	ipv4nodes.SetBase ("10.10.1.0", "255.255.255.0");
+	Ipv4InterfaceContainer onetoAip = ipv4nodes.Assign(onetoAContainer);
+
+//	ipv4nodes.SetBase ("10.10.2.0", "255.255.255.0");
+	Ipv4InterfaceContainer twotoAip = ipv4nodes.Assign(twotoAContainer);
+
+//	ipv4nodes.SetBase ("10.10.3.0", "255.255.255.0");
+	Ipv4InterfaceContainer threetoAip = ipv4nodes.Assign(threetoAContainer);
+
+//	ipv4nodes.SetBase ("10.10.4.0", "255.255.255.0");
+	Ipv4InterfaceContainer fourtoAip = ipv4nodes.Assign(fourtoAContainer);
+
+	Ipv4InterfaceContainer AtoBip = ipv4nodes.Assign(AtoBContainer);
+
+//	ipv4nodes.SetBase ("10.10.5.0", "255.255.255.0");
+	Ipv4InterfaceContainer BtoFiveip = ipv4nodes.Assign(BtoFiveContainer);
+
+//	ipv4nodes.SetBase ("10.10.6.0", "255.255.255.0");
+	Ipv4InterfaceContainer BtoSixip = ipv4nodes.Assign(BtoSixContainer);
+
+//	ipv4nodes.SetBase ("10.10.7.0", "255.255.255.0");
+	Ipv4InterfaceContainer BtoSevenip = ipv4nodes.Assign(BtoSevenContainer);
+
+//	ipv4nodes.SetBase ("10.10.8.0", "255.255.255.0");
+	Ipv4InterfaceContainer BtoEightip = ipv4nodes.Assign(BtoEightContainer);
+
+
+	
 	//APPLICATION
 
 	//Configure Sources
 	ApplicationContainer sources;
 
 	Address sourceLocalAddress(InetSocketAddress (Ipv4Address::GetAny(), port));
-	
+
 
 	//Install Sources
+
+	//NOTE:  How can you make it so you can determine which flow of traffic a packet belongs to by only 
+	//       examinining the TCP header which is what is available when the traces fire?  It's something that
+	//		 you set when you setup your applications
 	OnOffHelper sourceHelper("ns3::TcpSocketFactory", Address());
 	sourceHelper.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=1]"));
 	sourceHelper.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
 	sourceHelper.SetAttribute("DataRate", DataRateValue(DataRate(leafLinkBW)));
 	sourceHelper.SetAttribute("PacketSize", UintegerValue(packetSize));		
 
-	//NOTE:  How can you make it so you can determine which flow of traffic a packet belongs to by only 
-	//       examinining the TCP header which is what is available when the traces fire?  It's something that
-	//		 you set when you setup your applications
-
 	//
 
-	for(u32 i = 0; i < d.LeftCount(); ++i) {
+//	AddressValue remoteAddress (InetSocketAddres//	std::cout <<BtoEightip.GetIpv4Address(0) <<"   " <<BtoEightip.GetIpv4Address(1) << std::endl;
+	//1 to 5 source creation
+	ApplicationContainer sourceOnetoFive;
+	OnOffHelper sourceHelperOnetoFive("ns3::TcpSocketFactory", Address());
+	sourceHelperOnetoFive.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=1]"));
+	sourceHelperOnetoFive.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
+	sourceHelperOnetoFive.SetAttribute("DataRate", DataRateValue(DataRate(leafLinkBW)));
+	sourceHelperOnetoFive.SetAttribute("PacketSize", UintegerValue(packetSize));		
+	AddressValue remoteAddressOnetoFive (InetSocketAddress (onetoAip.GetAddress(0), port));
+	sourceHelperOnetoFive.SetAttribute("Remote", remoteAddressOnetoFive);
+	sourceOnetoFive = sourceHelperOnetoFive.Install(nodes.Get(0));
+	sourceOnetoFive.Start(Seconds (1.0));
+	sourceOnetoFive.Stop(Seconds (stopTime));
+
+	//1 to 5 source creation
+	ApplicationContainer sourceTwotoSix;
+	OnOffHelper sourceHelperTwotoSix("ns3::TcpSocketFactory", Address());
+	sourceHelperTwotoSix.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=1]"));
+	sourceHelperTwotoSix.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
+	sourceHelperTwotoSix.SetAttribute("DataRate", DataRateValue(DataRate(leafLinkBW)));
+	sourceHelperTwotoSix.SetAttribute("PacketSize", UintegerValue(packetSize));		
+	AddressValue remoteAddressTwotoSix (InetSocketAddress (BtoSixip.GetAddress(1), port+1));
+	sourceHelperTwotoSix.SetAttribute("Remote", remoteAddressTwotoSix);
+	sourceTwotoSix = sourceHelperTwotoSix.Install(nodes.Get(1));
+	sourceTwotoSix.Start(Seconds (1.0));
+	sourceTwotoSix.Stop(Seconds (stopTime));
+
+	//1 to 5 source creation
+	ApplicationContainer sourceThreetoSeven;
+	OnOffHelper sourceHelperThreetoSeven("ns3::TcpSocketFactory", Address());
+	sourceHelperThreetoSeven.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=1]"));
+	sourceHelperThreetoSeven.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
+	sourceHelperThreetoSeven.SetAttribute("DataRate", DataRateValue(DataRate(leafLinkBW)));
+	sourceHelperThreetoSeven.SetAttribute("PacketSize", UintegerValue(packetSize));		
+	AddressValue remoteAddressThreetoSeven (InetSocketAddress (BtoSevenip.GetAddress(1), port+2));
+	sourceHelperThreetoSeven.SetAttribute("Remote", remoteAddressThreetoSeven);
+	sourceThreetoSeven = sourceHelperThreetoSeven.Install(nodes.Get(2));
+	sourceThreetoSeven.Start(Seconds (1.0));
+	sourceThreetoSeven.Stop(Seconds (stopTime));
+
+	//1 to 5 source creation
+	ApplicationContainer sourceFourtoEight;
+	OnOffHelper sourceHelperFourtoEight("ns3::TcpSocketFactory", Address());
+	sourceHelperFourtoEight.SetAttribute("OnTime", StringValue("ns3::ConstantRandomVariable[Constant=1]"));
+	sourceHelperFourtoEight.SetAttribute("OffTime", StringValue("ns3::ConstantRandomVariable[Constant=0]"));
+	sourceHelperFourtoEight.SetAttribute("DataRate", DataRateValue(DataRate(leafLinkBW)));
+	sourceHelperFourtoEight.SetAttribute("PacketSize", UintegerValue(packetSize));		
+	AddressValue remoteAddressFourtoEight (InetSocketAddress (BtoEightip.GetAddress(1), port+3));
+	sourceHelperFourtoEight.SetAttribute("Remote", remoteAddressFourtoEight);
+	sourceFourtoEight = sourceHelperFourtoEight.Install(nodes.Get(3));
+	sourceFourtoEight.Start(Seconds (1.0));
+	sourceFourtoEight.Stop(Seconds (stopTime));
+
+/*
+	std::cout << onetoAip.GetAddress(0)<< "  " << onetoAip.Get(0).first << std::endl;
+	std::cout << twotoAip.GetAddress(0)<< "  " << twotoAip.Get(0).first << std::endl;
+	std::cout << threetoAip.GetAddress(0)<< "  " << threetoAip.Get(0).first << std::endl;
+	std::cout << fourtoAip.GetAddress(0)<< "  " << fourtoAip.Get(0).first << std::endl;
+
+	std::cout << AtoBip.GetAddress(1) << "  " << AtoBip.Get(0).first << std::endl;
+	std::cout << AtoBip.GetAddress(0) << "  " << AtoBip.Get(1).first << std::endl;
+
+	std::cout << BtoFiveip.GetAddress(1)<< "  " << BtoFiveip.Get(1).first << std::endl;
+	std::cout << BtoSixip.GetAddress(1)<< "  " << BtoSixip.Get(1).first << std::endl;
+	std::cout << BtoSevenip.GetAddress(1)<< "  " << BtoSevenip.Get(1).first << std::endl;
+	std::cout << BtoEightip.GetAddress(1)<< "  " << BtoEightip.Get(1).first << std::endl;
+*/
+
+	for(u32 i = 0; i < 4; ++i) {
 		//NOTE:  here I'm going to create one source on each leaf node and configure it to send to the corresponding leaf on the other side.
 		//       pretend I did this... I actually did do it but I removed it to not give everything away
 		AddressValue remoteAddress (InetSocketAddress (d.GetRightIpv4Address(i), port+i));
@@ -302,6 +475,32 @@ int main(int argc, char* argv[]) {
 
 	ApplicationContainer sinks;
 
+	ApplicationContainer sinkA;
+	Address sinkLocalAddressA(InetSocketAddress (AtoBip.GetAddress(1), port));
+	PacketSinkHelper sinkHelperA ("ns3::TcpSocketFactory", sinkLocalAddressA);
+	sinkA = sinkHelperA.Install(nodes.Get(4));
+	sinkA.Start(Seconds(0));
+
+	ApplicationContainer sinkFive;
+	Address sinkLocalAddressFive(InetSocketAddress (BtoFiveip.GetAddress(1), port));
+	PacketSinkHelper sinkHelperFive ("ns3::TcpSocketFactory", sinkLocalAddressFive);
+	sinkFive = sinkHelperFive.Install(nodes.Get(6));
+	sinkFive.Start(Seconds(0));
+
+	ApplicationContainer sinkSix;
+	Address sinkLocalAddressSix(InetSocketAddress (BtoSixip.GetAddress(1), port+1));
+	PacketSinkHelper sinkHelperSix ("ns3::TcpSocketFactory", sinkLocalAddressSix);
+	sinkSix.Start(Seconds(0));
+
+	ApplicationContainer sinkSeven;
+	Address sinkLocalAddressSeven(InetSocketAddress (BtoSevenip.GetAddress(1), port+2));
+	PacketSinkHelper sinkHelperSeven ("ns3::TcpSocketFactory", sinkLocalAddressSeven);
+	sinkSeven.Start(Seconds(0));
+
+	ApplicationContainer sinkEight;
+	Address sinkLocalAddressEight(InetSocketAddress (BtoEightip.GetAddress(1), port+3));
+	PacketSinkHelper sinkHelperEight ("ns3::TcpSocketFactory", sinkLocalAddressEight);
+	sinkEight.Start(Seconds(0));
 
 //Added WS
 
@@ -336,7 +535,7 @@ int main(int argc, char* argv[]) {
 
 		remove(filePlotQueue.str().c_str());
 		remove(filePlotQueueAvg.str().c_str());
-		Simulator::ScheduleNow(&CheckQueueSize, redQueue);
+		Simulator::ScheduleNow(&CheckQueueSize, redQueue1);
 	}
 
 	if(useFlowMon) {
@@ -347,7 +546,7 @@ int main(int argc, char* argv[]) {
 	Simulator::Run();
 
 	u32 totalBytes = 0;
-	
+
 	if(useFlowMon) {
 		std::stringstream flowOut;
 		flowOut << pathOut << "/" << "red.flowmon";
@@ -355,8 +554,11 @@ int main(int argc, char* argv[]) {
 		flowmon->SerializeToXmlFile(flowOut.str().c_str(), true, true);
 	}
 
-	for(u32 i = 0; i < sinks.GetN(); ++i) {
-		Ptr<Application> app = sinks.Get(i);
+	std::cout << sinkFive.GetN() << std::endl;
+	std::cout << sourceThreetoSeven.GetN() << std::endl;
+	for(u32 i = 0; i < sinkA.GetN(); ++i) {
+
+		Ptr<Application> app = sinkA.Get(i);
 		Ptr<PacketSink> pktSink = DynamicCast<PacketSink>(app);
 		u32 recieved = pktSink->GetTotalRx();
 		std::cout << "\tSink\t" << i << "\tBytes\t" << recieved << std::endl;
