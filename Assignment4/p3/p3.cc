@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 
 #ifdef NS3_MPI
 #include <mpi.h>
@@ -24,7 +25,7 @@ int main(int argc, char* argv[]) {
 	CommandLine cmd;
   cmd.AddValue("threads", "Number of threads for simulation", threads);
   cmd.Parse(argc, argv);
-  
+
 
 
 }
