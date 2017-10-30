@@ -10,7 +10,8 @@
 int main(int argc, char* argv[]) {
 
 	std::cout << "Hello" << std::endl; 
-  int numtasks, rank, rc;
+  int rc;
+
   rc = MPI_Init(&argc,&argv);
   if (rc != MPI_SUCCESS) {
     std::cout << "Error starting MPI program. Terminating." << std::endl;
