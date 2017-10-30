@@ -1,5 +1,8 @@
 #include <iostream>
-#include <mpi>
+
+#ifdef NS3_MPI
+#include <mpi.h>
+#endif
 
 #include "p2pCampusHelper.h"
 
