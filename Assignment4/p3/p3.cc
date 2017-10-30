@@ -21,5 +21,10 @@ int main(int argc, char* argv[]) {
     std::cout << "MPI! It VERKS" << std::endl;
 
   }
+	CommandLine cmd;
+  cmd.AddValue("threads", "Number of threads for simulation", threads);
+  cmd.Parse(argc, argv);
+  
+
 
 }
