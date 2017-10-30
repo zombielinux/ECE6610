@@ -12,6 +12,7 @@ int main(int argc, char* argv[]) {
 
 	std::cout << "Hello" << std::endl; 
   int rc;
+  int threads = 1;
 
   rc = MPI_Init(&argc,&argv);
   if (rc != MPI_SUCCESS) {
