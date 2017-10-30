@@ -1,5 +1,5 @@
 #include <iostream>
-#include <mpi.h>
+#include <mpi>
 
 #include "p2pCampusHelper.h"
 
