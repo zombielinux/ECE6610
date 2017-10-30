@@ -17,7 +17,8 @@ int main(int argc, char* argv[]) {
  		MPI_Abort(MPI_COMM_WORLD, rc);
   }
   if (rc == MPI_SUCCESS) {
-    std::cout << "MPI! It VERKS"" << std:endl;
+    std::cout << "MPI! It VERKS" << std:endl;
+
   }
 
 }
