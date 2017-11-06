@@ -191,7 +191,7 @@ int main(int argc, char* argv[]) {
 		  	hub0toinner0.SetChannelAttribute("Delay", StringValue(hubInnerLat));
 		  	NetDeviceContainer hub0toinner0container = hub0toinner0.Install(hubs.Get(0), hub0inners.Get(0));
             ipv4nodes.SetBase ("10.1.1.0", "255.255.255.128");
-            Ipv4InterfaceContainer hub0inner0ip = ipv4nodes.Assign(hub0inner0container);
+            Ipv4InterfaceContainer hub0inner0ip = ipv4nodes.Assign(hub0toinner0container);
 
 
 			//Outers of Inner0
@@ -215,7 +215,7 @@ int main(int argc, char* argv[]) {
 			  hub0toinner1.SetChannelAttribute("Delay", StringValue(hubInnerLat));
 			  NetDeviceContainer hub0toinner1container = hub0toinner1.Install(hubs.Get(0), hub0inners.Get(1));
 		      ipv4nodes.SetBase ("10.1.2.0", "255.255.255.128");
-              Ipv4InterfaceContainer hub0inner1ip = ipv4nodes.Assign(hub0inner1container);
+              Ipv4InterfaceContainer hub0inner1ip = ipv4nodes.Assign(hub0toinner1container);
 
 		//Outers of Inner1
 			  if (hub0outersExist[2] < 4){
@@ -238,7 +238,7 @@ int main(int argc, char* argv[]) {
 			  hub0toinner2.SetChannelAttribute("Delay", StringValue(hubInnerLat));
 			  NetDeviceContainer hub0toinner2container = hub0toinner2.Install(hubs.Get(0), hub0inners.Get(2));
               ipv4nodes.SetBase ("10.1.3.0", "255.255.255.128");
-              Ipv4InterfaceContainer hub0inner2ip = ipv4nodes.Assign(hub0inner2container);
+              Ipv4InterfaceContainer hub0inner2ip = ipv4nodes.Assign(hub0toinner2container);
 
 		//Outers of Inner2
 			  if (hub0outersExist[4] < 4){
@@ -261,7 +261,7 @@ int main(int argc, char* argv[]) {
 			  hub0toinner3.SetChannelAttribute("Delay", StringValue(hubInnerLat));
 			  NetDeviceContainer hub0toinner3container = hub0toinner3.Install(hubs.Get(0), hub0inners.Get(3));
               ipv4nodes.SetBase ("10.1.4.0", "255.255.255.128");
-              Ipv4InterfaceContainer hub0inner3ip = ipv4nodes.Assign(hub0inner3container);
+              Ipv4InterfaceContainer hub0inner3ip = ipv4nodes.Assign(hub0toinner3container);
 
 		//Outers of Inner3
 			  if (hub0outersExist[6] < 4){
@@ -284,7 +284,7 @@ int main(int argc, char* argv[]) {
 			  hub0toinner4.SetChannelAttribute("Delay", StringValue(hubInnerLat));
 			  NetDeviceContainer hub0toinner4container = hub0toinner4.Install(hubs.Get(0), hub0inners.Get(4));
               ipv4nodes.SetBase ("10.1.5.0", "255.255.255.128");
-              Ipv4InterfaceContainer hub0inner4ip = ipv4nodes.Assign(hub0inner4container);
+              Ipv4InterfaceContainer hub0inner4ip = ipv4nodes.Assign(hub0toinner4container);
 
 		//Outers of Inner4
 			  if (hub0outersExist[8] < 4){
@@ -307,7 +307,7 @@ int main(int argc, char* argv[]) {
 			  hub0toinner5.SetChannelAttribute("Delay", StringValue(hubInnerLat));
 			  NetDeviceContainer hub0toinner5container = hub0toinner5.Install(hubs.Get(0), hub0inners.Get(5));
               ipv4nodes.SetBase ("10.1.6.0", "255.255.255.128");
-              Ipv4InterfaceContainer hub0inner5ip = ipv4nodes.Assign(hub0inner5container);
+              Ipv4InterfaceContainer hub0inner5ip = ipv4nodes.Assign(hub0toinner5container);
 
 		//Outers of Inner5
 			  if (hub0outersExist[10] < 4){
@@ -330,7 +330,7 @@ int main(int argc, char* argv[]) {
 			  hub0toinner6.SetChannelAttribute("Delay", StringValue(hubInnerLat));
 			  NetDeviceContainer hub0toinner6container = hub0toinner6.Install(hubs.Get(0), hub0inners.Get(6));
 			  ipv4nodes.SetBase ("10.1.7.0", "255.255.255.128");
-              Ipv4InterfaceContainer hub0inner6ip = ipv4nodes.Assign(hub0inner6container);
+              Ipv4InterfaceContainer hub0inner6ip = ipv4nodes.Assign(hub0toinner6container);
 		//Outers of Inner6
 			  if (hub0outersExist[12] < 4){
 				  PointToPointHelper hub0inner6toouter12;
@@ -352,7 +352,7 @@ int main(int argc, char* argv[]) {
 			  hub0toinner7.SetChannelAttribute("Delay", StringValue(hubInnerLat));
 			  NetDeviceContainer hub0toinner7container = hub0toinner7.Install(hubs.Get(0), hub0inners.Get(7));
               ipv4nodes.SetBase ("10.1.8.0", "255.255.255.128");
-              Ipv4InterfaceContainer hub0inner7ip = ipv4nodes.Assign(hub0inner7container);
+              Ipv4InterfaceContainer hub0inner7ip = ipv4nodes.Assign(hub0toinner7container);
 
 		//Outers of Inner7
 			  if (hub0outersExist[14] < 4){
