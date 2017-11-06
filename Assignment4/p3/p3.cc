@@ -19,6 +19,9 @@
 #include "ns3/flow-monitor-module.h"
 
 
+using i32 = int32_t;
+using u32 = uint32_t;
+
 int main(int argc, char* argv[]) {
 
   //std::cout << "Hello" << std::endl; 
@@ -133,6 +136,9 @@ int main(int argc, char* argv[]) {
 
 	  NodeContainer hub3outers;
 	  hub3outers.Create(inner*outer);
+
+	  InternetStackHelper stack;
+	  for( u32 i=0; i < hubs.GetN(); i++) stack.Install(hubs.Get(i));
 
    	  if (rank == 0){
 		//Handle the hub to hub connections first
@@ -332,6 +338,8 @@ int main(int argc, char* argv[]) {
 		  }
 
 		//Outer Ring of hub0
+		  for( u32 i=0; i < hub0inners.GetN(); i++) stack.Install(hub0inners.Get(i));
+        	  for( u32 i=0; i < hub0outers.GetN(); i++) stack.Install(hub0outers.Get(i));
 
 		}
 	  if (((numtasks == 1) && (rank == 0)) || ((numtasks == 2) && (rank == 0)) || ((numtasks == 4) && (rank == 1))){
@@ -526,11 +534,14 @@ int main(int argc, char* argv[]) {
 				  NetDeviceContainer hub1inner7toouter15container = hub1inner7toouter15.Install(hub1inners.Get(7), hub1outers.Get(15));
 			  }
 		  }
-
-
-
+		//Install internet stack on Hub1
+		  for( u32 i=0; i < hub1inners.GetN(); i++) stack.Install(hub1inners.Get(i));
+	          for( u32 i=0; i < hub1outers.GetN(); i++) stack.Install(hub1outers.Get(i));
 
 		}
+
+
+	//HUB 2
 	  if (((numtasks == 1) && (rank == 0)) || ((numtasks == 2) && (rank == 1)) || ((numtasks == 4) && (rank == 2))){
 		  std::cout << "Rank " << rank << " handling hub2tohub3" << std::endl;
 		  PointToPointHelper hub2tohub3;
@@ -719,7 +730,11 @@ int main(int argc, char* argv[]) {
 				  NetDeviceContainer hub2inner7toouter15container = hub2inner7toouter15.Install(hub2inners.Get(7), hub2outers.Get(15));
 			  }
 		  }
-        }
+		  for( u32 i=0; i < hub2inners.GetN(); i++) stack.Install(hub2inners.Get(i));
+	          for( u32 i=0; i < hub2outers.GetN(); i++) stack.Install(hub2outers.Get(i));
+          }
+
+ 	//HUB3
   	  if (((numtasks == 1) && (rank == 0)) || ((numtasks == 2) && (rank == 1)) || ((numtasks == 4) && (rank == 3))){
 		//Inner ring of hub3
 
@@ -902,6 +917,10 @@ int main(int argc, char* argv[]) {
 				  NetDeviceContainer hub3inner7toouter15container = hub3inner7toouter15.Install(hub3inners.Get(7), hub3outers.Get(15));
 			  }
 		  }
+		//Install internet stack on Hub4
+	          for( u32 i=0; i < hub3outers.GetN(); i++) stack.Install(hub3outers.Get(i));
+		  for( u32 i=0; i < hub3inners.GetN(); i++) stack.Install(hub3inners.Get(i));
+
 		}
 
 	  for (int i=0; i < ncampuses/numtasks; i++) {
