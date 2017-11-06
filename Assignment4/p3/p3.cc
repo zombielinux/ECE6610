@@ -106,27 +106,6 @@ int main(int argc, char* argv[]) {
 //DBG	 if (x <=4)  std::cout << "Rank: " << rank << " Randint "<< j << ": "<< x << std::endl;
 //DBG	 else std::cout << "Node " << j << " doesn't get an address" << std::endl;
 	}
-
-
-//Do the inner nodes on hub 0 exist
-  int hub2innersExist [8] = {};
-  for (int j = 0; j <8; j++){
-	x=0;
-	for (int i=0; i <7; i++) x+= randint->GetInteger();
-	hub2innersExist [j]=x;
-	}
-  for (int j =0; j<8;j++) hub2innersExist[j] = hub2innersExist[j];
-//Do the inner nodes on hub 0 exist
-  int hub3innersExist [8] = {};
-  for (int j = 0; j <8; j++){
-	x=0;
-	for (int i=0; i <7; i++) x+= randint->GetInteger();
-	hub3innersExist [j]=x;
-	}
-  for (int j =0; j<8;j++) hub3innersExist[j] = hub3innersExist[j];
-
-
-
 //Create node containers
 	  NodeContainer hubs;
 	  hubs.Create(ncampuses);
@@ -560,6 +539,24 @@ int main(int argc, char* argv[]) {
 	  	  hub2tohub3.SetChannelAttribute("Delay", StringValue(hubHubLat));
 		  NetDeviceContainer hub2tohub3container = hub2tohub3.Install(hubs.Get(2),hubs.Get(3));
 
+		//Do the inner nodes on hub 2 exist
+		  int hub2innersExist [8] = {};
+		  for (int j = 0; j <8; j++){
+			x=0;
+			for (int i=0; i <7; i++) x+= randint->GetInteger();
+			hub2innersExist [j]=x;
+			}
+		  for (int j =0; j<8;j++) hub2innersExist[j] = hub2innersExist[j];
+
+		//Do the outer nodes on hub 2 exist
+		  int hub2outersExist[16] = {};
+		  for (int j =0; j<16; j++){
+			x=0;
+			for (int i=0; i<6; i++) x+= randint->GetInteger();
+			hub2outersExist[j]=x;
+		  }
+
+
 		//Inner ring of hub 2
 				//Inner Ring of Hub 0
 		//Inner ring 0
@@ -727,7 +724,25 @@ int main(int argc, char* argv[]) {
 
   	  if (((numtasks == 1) && (rank == 0)) || ((numtasks == 2) && (rank == 1)) || ((numtasks == 4) && (rank == 3))){
 		//Inner ring of hub3
-		//Inner Ring of Hub 0
+
+		//Do the inner nodes on hub 3 exist
+		  int hub3innersExist [8] = {};
+		  for (int j = 0; j <8; j++){
+			x=0;
+			for (int i=0; i <7; i++) x+= randint->GetInteger();
+			hub3innersExist [j]=x;
+			}
+		  for (int j =0; j<8;j++) hub3innersExist[j] = hub3innersExist[j];
+
+		//Do the outer nodes on hub 3 exist
+		  int hub3outersExist[16] = {};
+		  for (int j =0; j<16; j++){
+			x=0;
+			for (int i=0; i<6; i++) x+= randint->GetInteger();
+			hub3outersExist[j]=x;
+		  }
+
+
 		//Inner ring 0
 		  if (hub3innersExist[0] <=4) {
 		  	PointToPointHelper hub3toinner0;
@@ -889,7 +904,7 @@ int main(int argc, char* argv[]) {
 				  NetDeviceContainer hub3inner7toouter15container = hub3inner7toouter15.Install(hub3inners.Get(7), hub3outers.Get(15));
 			  }
 		  }
-
+		}
 
 
 
