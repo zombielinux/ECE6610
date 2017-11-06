@@ -167,6 +167,9 @@ int main(int argc, char* argv[]) {
           ipv4nodes.SetBase ("10.3.0.0", "255.255.255.0");
           Ipv4InterfaceContainer hub0tohub3ip = ipv4nodes.Assign(hub0tohub3container);
 
+		  for( u32 i=0; i < hub0inners.GetN(); i++) stack.Install(hub0inners.Get(i));
+       	  for( u32 i=0; i < hub0outers.GetN(); i++) stack.Install(hub0outers.Get(i));
+
 		//Do the inner nodes on hub 0 exist
 		  int hub0innersExist [8] = {};
 		  for (int j = 0; j <8; j++){
@@ -370,8 +373,7 @@ int main(int argc, char* argv[]) {
 		  }
 
 		//Outer Ring of hub0
-		  for( u32 i=0; i < hub0inners.GetN(); i++) stack.Install(hub0inners.Get(i));
-       	  for( u32 i=0; i < hub0outers.GetN(); i++) stack.Install(hub0outers.Get(i));
+
 
         //Assign Hub IP addresses.
 
