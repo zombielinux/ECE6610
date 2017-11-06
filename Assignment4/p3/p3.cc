@@ -334,7 +334,6 @@ int main(int argc, char* argv[]) {
 		//Outer Ring of hub0
 
 		}
-
 	  if (((numtasks == 1) && (rank == 0)) || ((numtasks == 2) && (rank == 0)) || ((numtasks == 4) && (rank == 1))){
 	 	 std::cout << "Rank " << rank << " handling hub1tohub2, hub1tohub3" << std::endl;
 		 PointToPointHelper hub1tohub2;
@@ -720,8 +719,7 @@ int main(int argc, char* argv[]) {
 				  NetDeviceContainer hub2inner7toouter15container = hub2inner7toouter15.Install(hub2inners.Get(7), hub2outers.Get(15));
 			  }
 		  }
-
-
+        }
   	  if (((numtasks == 1) && (rank == 0)) || ((numtasks == 2) && (rank == 1)) || ((numtasks == 4) && (rank == 3))){
 		//Inner ring of hub3
 
@@ -906,16 +904,10 @@ int main(int argc, char* argv[]) {
 		  }
 		}
 
-
-
 	  for (int i=0; i < ncampuses/numtasks; i++) {
 		std::cout << "I am rank " << rank << " and I am responsible for hub" << ncampuses*rank/numtasks+i << std::endl;
 		//IT VERKS! WS 11-04-17
 	  }
-	  //Hub1
-	  //Hub2
-	  //Hub3
-	  //Hub4
 
 
 
