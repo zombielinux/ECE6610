@@ -140,6 +140,9 @@ int main(int argc, char* argv[]) {
 	  InternetStackHelper stack;
 	  for( u32 i=0; i < hubs.GetN(); i++) stack.Install(hubs.Get(i));
 
+	  Ipv4AddressHelper ipv4nodes;
+
+   	//HUB 0
    	  if (rank == 0){
 		//Handle the hub to hub connections first
 		  std::cout << "Rank " << rank << " handling hub0tohub1, hub0tohub2, hub0tohub3" << std::endl;
@@ -147,16 +150,22 @@ int main(int argc, char* argv[]) {
 		  hub0tohub1.SetDeviceAttribute("DataRate", StringValue(hubHubBW));
 		  hub0tohub1.SetChannelAttribute("Delay", StringValue(hubHubLat));
 		  NetDeviceContainer hub0tohub1container = hub0tohub1.Install(hubs.Get(0),hubs.Get(1));
+          ipv4nodes.SetBase ("10.1.0.0", "255.255.255.0");
+          Ipv4InterfaceContainer hub0tohub1ip = ipv4nodes.Assign(hub0tohub1container);
 
 		  PointToPointHelper hub0tohub2;
 		  hub0tohub2.SetDeviceAttribute("DataRate", StringValue(hubHubBW));
 		  hub0tohub2.SetChannelAttribute("Delay", StringValue(hubHubLat));
 		  NetDeviceContainer hub0tohub2container = hub0tohub2.Install(hubs.Get(0),hubs.Get(2));
+          ipv4nodes.SetBase ("10.2.0.0", "255.255.255.0");
+          Ipv4InterfaceContainer hub0tohub2ip = ipv4nodes.Assign(hub0tohub2container);
 
 		  PointToPointHelper hub0tohub3;
 		  hub0tohub3.SetDeviceAttribute("DataRate", StringValue(hubHubBW));
 		  hub0tohub3.SetChannelAttribute("Delay", StringValue(hubHubLat));
 		  NetDeviceContainer hub0tohub3container = hub0tohub3.Install(hubs.Get(0),hubs.Get(3));
+          ipv4nodes.SetBase ("10.3.0.0", "255.255.255.0");
+          Ipv4InterfaceContainer hub0tohub3ip = ipv4nodes.Assign(hub0tohub3container);
 
 		//Do the inner nodes on hub 0 exist
 		  int hub0innersExist [8] = {};
@@ -339,20 +348,30 @@ int main(int argc, char* argv[]) {
 
 		//Outer Ring of hub0
 		  for( u32 i=0; i < hub0inners.GetN(); i++) stack.Install(hub0inners.Get(i));
-        	  for( u32 i=0; i < hub0outers.GetN(); i++) stack.Install(hub0outers.Get(i));
+       	  for( u32 i=0; i < hub0outers.GetN(); i++) stack.Install(hub0outers.Get(i));
+
+        //Assign Hub IP addresses.
+
 
 		}
+    //HUB 0
+
+    //HUB 1
 	  if (((numtasks == 1) && (rank == 0)) || ((numtasks == 2) && (rank == 0)) || ((numtasks == 4) && (rank == 1))){
 	 	 std::cout << "Rank " << rank << " handling hub1tohub2, hub1tohub3" << std::endl;
 		 PointToPointHelper hub1tohub2;
 		  hub1tohub2.SetDeviceAttribute("DataRate", StringValue(hubHubBW));
 		  hub1tohub2.SetChannelAttribute("Delay", StringValue(hubHubLat));
 		  NetDeviceContainer hub1tohub2container = hub1tohub2.Install(hubs.Get(1),hubs.Get(2));
+          ipv4nodes.SetBase ("10.4.0.0", "255.255.255.0");
+          Ipv4InterfaceContainer hub1tohub2ip = ipv4nodes.Assign(hub1tohub2container);
 
 		  PointToPointHelper hub1tohub3;
 		  hub1tohub3.SetDeviceAttribute("DataRate", StringValue(hubHubBW));
 		  hub1tohub3.SetChannelAttribute("Delay", StringValue(hubHubLat));
 		  NetDeviceContainer hub1tohub3container = hub1tohub3.Install(hubs.Get(1),hubs.Get(3));
+          ipv4nodes.SetBase ("10.5.0.0", "255.255.255.0");
+          Ipv4InterfaceContainer hub1tohub3ip = ipv4nodes.Assign(hub1tohub3container);
 
 		//Do the inner nodes on hub 1 exist
   		  int hub1innersExist [8] = {};
@@ -539,7 +558,7 @@ int main(int argc, char* argv[]) {
 	          for( u32 i=0; i < hub1outers.GetN(); i++) stack.Install(hub1outers.Get(i));
 
 		}
-
+    //HUB 1
 
 	//HUB 2
 	  if (((numtasks == 1) && (rank == 0)) || ((numtasks == 2) && (rank == 1)) || ((numtasks == 4) && (rank == 2))){
@@ -548,6 +567,8 @@ int main(int argc, char* argv[]) {
 		  hub2tohub3.SetDeviceAttribute("DataRate", StringValue(hubHubBW));
 	  	  hub2tohub3.SetChannelAttribute("Delay", StringValue(hubHubLat));
 		  NetDeviceContainer hub2tohub3container = hub2tohub3.Install(hubs.Get(2),hubs.Get(3));
+          ipv4nodes.SetBase ("10.6.0.0", "255.255.255.0");
+          Ipv4InterfaceContainer hub2tohub3ip = ipv4nodes.Assign(hub2tohub3container);
 
 		//Do the inner nodes on hub 2 exist
 		  int hub2innersExist [8] = {};
@@ -733,8 +754,9 @@ int main(int argc, char* argv[]) {
 		  for( u32 i=0; i < hub2inners.GetN(); i++) stack.Install(hub2inners.Get(i));
 	          for( u32 i=0; i < hub2outers.GetN(); i++) stack.Install(hub2outers.Get(i));
           }
+	//HUB 2
 
- 	//HUB3
+ 	//HUB 3
   	  if (((numtasks == 1) && (rank == 0)) || ((numtasks == 2) && (rank == 1)) || ((numtasks == 4) && (rank == 3))){
 		//Inner ring of hub3
 
@@ -922,6 +944,8 @@ int main(int argc, char* argv[]) {
 		  for( u32 i=0; i < hub3inners.GetN(); i++) stack.Install(hub3inners.Get(i));
 
 		}
+ 	//HUB 3
+
 
 	  for (int i=0; i < ncampuses/numtasks; i++) {
 		std::cout << "I am rank " << rank << " and I am responsible for hub" << ncampuses*rank/numtasks+i << std::endl;
